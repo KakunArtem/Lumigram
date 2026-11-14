@@ -12,7 +12,6 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "storage/localstorage.h"
 #include "storage/storage_folder_archive.h"
 #include "storage/storage_media_prepare.h"
-#include "iv/iv_instance.h"
 #include "mainwidget.h"
 #include "main/main_app_config.h"
 #include "main/main_session.h"
@@ -31,6 +30,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "history/view/controls/history_view_characters_limit.h"
 #include "history/view/controls/history_view_compose_ai_button.h"
 #include "history/view/history_view_schedule_box.h"
+#include "core/click_handler_types.h"
 #include "core/mime_type.h"
 #include "core/shortcuts.h"
 #include "core/ui_integration.h"
@@ -162,7 +162,11 @@ void RenameFileBox(
 		field->setFocusFast();
 	});
 	const auto save = [=] {
-		const auto newName = field->getLastText().trimmed();
+		auto newName = field->getLastText().trimmed();
+		if (!extension.isEmpty()
+			&& newName.endsWith(extension, Qt::CaseInsensitive)) {
+			newName.chop(extension.size());
+		}
 		if (newName.isEmpty()) {
 			field->showError();
 			return;
@@ -335,9 +339,12 @@ void EditPriceBox(
 			st::paidAmountAbout),
 		st::boxRowPadding + QMargins(0, st::sendMediaRowSkip, 0, 0));
 	about->setClickHandlerFilter([=](const auto &...) {
-		Core::App().iv().openWithIvPreferred(
+		HiddenUrlClickHandler::OpenTranslatedWithIv(
 			session,
-			tr::lng_paid_about_link_url(tr::now));
+			tr::lng_paid_about_link_url,
+			QVariant::fromValue(ClickHandlerContext{
+				.show = box->uiShow(),
+			}));
 		return false;
 	});
 

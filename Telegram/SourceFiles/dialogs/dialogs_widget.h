@@ -77,6 +77,7 @@ namespace Dialogs {
 
 extern const char kOptionForumHideChatsList[];
 
+class BottomButton;
 struct RowDescriptor;
 class Row;
 class FakeRow;
@@ -237,6 +238,7 @@ private:
 
 	// Child list may be unable to set specific search state.
 	bool applySearchState(SearchState state);
+	void trackSearchInChatDestroyed();
 
 	void showCalendar();
 	void showSearchFrom();
@@ -374,13 +376,13 @@ private:
 	rpl::event_stream<bool> _searchStateForTopBarSuggestion;
 	rpl::event_stream<> _prepareTopBarSnapshot;
 	rpl::variable<bool> _openedFolderOrForum;
+	rpl::variable<FilterId> _chatsFilterForTopBarSuggestion;
 
 	object_ptr<Ui::ElasticScroll> _scroll;
 	Ui::VerticalLayout *_innerList = nullptr;
 	InnerWidget *_inner = nullptr;
 	std::unique_ptr<Suggestions> _suggestions;
 	std::vector<std::unique_ptr<Suggestions>> _hidingSuggestions;
-	class BottomButton;
 	object_ptr<BottomButton> _updateTelegram = { nullptr };
 	object_ptr<BottomButton> _loadMoreChats = { nullptr };
 	std::unique_ptr<Ui::DownloadBar> _downloadBar;
@@ -404,6 +406,7 @@ private:
 	SearchState _searchState;
 	History *_searchInMigrated = nullptr;
 	rpl::lifetime _searchTagsLifetime;
+	rpl::lifetime _searchInChatLifetime;
 	QString _lastSearchText;
 	bool _searchSuggestionsLocked = false;
 	bool _searchHasFocus = false;
@@ -448,6 +451,7 @@ private:
 	SearchProcessState _searchProcess;
 	SearchProcessState _migratedProcess;
 	SearchProcessState _postsProcess;
+	uint64 _searchGeneration = 0;
 	int _historiesRequest = 0; // Not real mtpRequestId.
 
 	Api::PeerSearch _peerSearch;

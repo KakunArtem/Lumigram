@@ -3723,10 +3723,6 @@ void Suggestions::clearPersistance() {
 	_persist = false;
 }
 
-bool Suggestions::chatsTabActive() const {
-	return (_key.current().tab == Tab::Chats);
-}
-
 void Suggestions::setTabsOnly(bool tabsOnly) {
 	if (_tabsOnly == tabsOnly) {
 		return;

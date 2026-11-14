@@ -411,10 +411,9 @@ void FillSponsoredMessageBar(
 			? (rightPhotoPlaceholder + bottomPadding * 2)
 			: desiredHeight;
 		container->resize(
-			container->width(),
-			Material::BarRowHeight(std::clamp(
-				desiredHeight,
-				minHeight,
+			widget->width(),
+			Material::BarRowHeight(std::min(
+				std::max(desiredHeight, minHeight),
 				st::sponsoredMessageBarMaxHeight)));
 	}, widget->lifetime());
 	{ // Calculate a good size for container.

@@ -109,6 +109,8 @@ public:
 		bool textUpdated);
 };
 
+[[nodiscard]] int CollapsedRowTextBaseline();
+
 void PaintCollapsedRow(
 	Painter &p,
 	const BasicRow &row,
