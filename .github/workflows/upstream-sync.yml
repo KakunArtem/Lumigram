@@ -1,0 +1,123 @@
+name: Upstream sync check.
+
+# Every week, compare dev with the newest Telegram Desktop release and open
+# (or refresh) an issue when a sync is due. It only test-merges in the
+# runner, so it never pushes code.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      UPSTREAM: https://github.com/telegramdesktop/tdesktop.git
+      LABEL: upstream-sync
+    steps:
+      - name: Checkout dev.
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+          submodules: false
+
+      - name: Find the newest upstream release.
+        id: upstream
+        run: |
+          git remote add upstream "$UPSTREAM"
+          git fetch --quiet --no-recurse-submodules upstream --tags
+          tag=$(git tag -l 'v*' --sort=-v:refname \
+            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if git merge-base --is-ancestor "$tag" HEAD; then
+            echo "due=false" >> "$GITHUB_OUTPUT"
+            echo "dev already contains $tag."
+          else
+            echo "due=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Close the sync issue once dev has caught up.
+        if: steps.upstream.outputs.due == 'false'
+        env:
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          for number in $(gh issue list --label "$LABEL" --state open \
+              --json number --jq '.[].number'); do
+            gh issue close "$number" --comment "dev now contains $TAG."
+          done
+
+      - name: Test-merge the release.
+        if: steps.upstream.outputs.due == 'true'
+        id: merge
+        env:
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          behind=$(git rev-list --count "HEAD..$TAG")
+          base=$(git merge-base HEAD "$TAG")
+          ours=$(git rev-parse HEAD:Telegram/lib_ui)
+          theirs=$(git rev-parse "$TAG:Telegram/lib_ui")
+          if git merge --no-commit --no-ff "$TAG" > merge.log 2>&1; then
+            conflicts=""
+          else
+            conflicts=$(git diff --name-only --diff-filter=U)
+          fi
+          git merge --abort 2>/dev/null || true
+          {
+            echo "## Telegram Desktop $TAG is out"
+            echo
+            echo "- dev is **$behind** upstream commits behind $TAG."
+            echo "- Last synced upstream commit: \`$(git log -1 --format='%h %ad %s' --date=short "$base")\`."
+            echo "- Upstream pins lib_ui at \`${theirs:0:10}\`; dev uses \`${ours:0:10}\` (our soft-panels branch)."
+            echo
+            if [ -z "$conflicts" ]; then
+              echo "### The test merge had no conflicts"
+            else
+              echo "### Files that conflict in a test merge"
+              echo
+              echo "$conflicts" | sed 's/^/- `/; s/$/`/'
+            fi
+            echo
+            echo "### Sync steps"
+            echo
+            echo '```bash'
+            echo "git fetch upstream --tags"
+            echo "git switch -c sync/$TAG dev"
+            echo "git merge $TAG"
+            echo '```'
+            echo
+            echo "1. Keep Lumigram's names in \`core/version.h\` and \`Telegram.rc\`, with the new version numbers."
+            echo "2. In \`Telegram/lib_ui\`, merge \`${theirs:0:10}\` into \`soft-panels\`, push it, and stage the new pointer."
+            echo "3. \`git submodule update --init --recursive\`, build, test, then merge into dev and build an installer."
+          } > body.md
+          cat body.md
+
+      - name: Open or refresh the sync issue.
+        if: steps.upstream.outputs.due == 'true'
+        env:
+          TAG: ${{ steps.upstream.outputs.tag }}
+        run: |
+          gh label create "$LABEL" --color 1D76DB \
+            --description "Telegram Desktop upstream sync" --force
+          title="Sync with Telegram Desktop $TAG"
+          existing=$(gh issue list --label "$LABEL" --state open \
+            --json number --jq '.[0].number')
+          if [ -n "$existing" ]; then
+            gh issue edit "$existing" --title "$title" --body-file body.md
+            echo "Updated issue #$existing."
+          else
+            gh issue create --title "$title" --label "$LABEL" \
+              --body-file body.md
+          fi
