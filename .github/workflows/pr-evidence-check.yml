@@ -11,6 +11,7 @@ permissions:
 jobs:
   check-evidence:
     runs-on: ubuntu-slim
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - name: Check for screenshot or video demonstration
         env:

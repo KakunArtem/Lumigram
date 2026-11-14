@@ -5,6 +5,7 @@ on:
 jobs:
   publish:
     runs-on: windows-latest # action can only be run on windows
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - if: github.event.action == 'released'
         uses: telegramdesktop/winget-releaser@main

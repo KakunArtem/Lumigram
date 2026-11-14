@@ -6,6 +6,7 @@ on:
 jobs:
   stale:
     runs-on: ubuntu-slim
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - uses: actions/stale@v11
         with:

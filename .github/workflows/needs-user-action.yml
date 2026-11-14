@@ -9,6 +9,7 @@ on:
 jobs:
   needs-user-action:
     runs-on: ubuntu-slim
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - uses: lee-dohm/no-response@v0.5.0
         with:

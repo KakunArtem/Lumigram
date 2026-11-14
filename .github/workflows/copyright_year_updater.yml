@@ -10,6 +10,7 @@ on:
 jobs:
   Copyright-year:
     runs-on: ubuntu-slim
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - uses: desktop-app/action_code_updater@master
         with:

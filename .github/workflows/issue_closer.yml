@@ -7,6 +7,7 @@ on:
 jobs:
   comment:
     runs-on: ubuntu-slim
+    if: github.repository == 'telegramdesktop/tdesktop'
     steps:
       - name: Process an issue.
         uses: desktop-app/action_issue_closer@master
