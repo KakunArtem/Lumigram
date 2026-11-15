@@ -3831,7 +3831,9 @@ base::weak_qptr<Ui::BoxContent> ShowForwardMessagesBox(
 					onstack({});
 				}
 			},
-			showMenu);
+			showMenu,
+			state->starsToSend.value(),
+			field);
 		sendButton->hide();
 		const auto &padding = st::shareSoftCommentPadding;
 		rpl::combine(

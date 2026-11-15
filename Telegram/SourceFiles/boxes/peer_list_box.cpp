@@ -221,7 +221,12 @@ void PeerListBox::prepare() {
 		_init(this);
 	}
 
-	{
+	if (_soft) {
+		// WHY: like the share box, the soft forward box keeps one list
+		// height, so the card's rounded bottom and the comment row stay
+		// on screen instead of reaching the window's bottom edge.
+		setDimensions(_controller->contentWidth(), st::boxMaxListHeight);
+	} else {
 		setDimensions(
 			_controller->contentWidth(),
 			std::clamp(
@@ -376,6 +381,7 @@ void PeerListBox::paintEvent(QPaintEvent *e) {
 void PeerListBox::setSoftStyle() {
 	_soft = true;
 	setStyle(st::shareBoxSoft);
+	setProperty(Ui::kNoScrollShadowsProperty, true);
 	content()->setSoftCard(true);
 	if (_select) {
 		_select->geometryValue(
@@ -1763,9 +1769,13 @@ void PeerListContent::paintEvent(QPaintEvent *e) {
 		}
 	}
 	if (_softCard) {
-		Window::SoftPanels::PaintListCard(
-			p,
-			QRectF(rect().marginsRemoved(st::peerListSoftCardMargins)));
+		const auto card = QRectF(Window::SoftPanels::VisibleListCard(
+			rect().marginsRemoved(st::peerListSoftCardMargins),
+			height(),
+			_visibleTop,
+			_visibleBottom));
+		Window::SoftPanels::PaintListCard(p, card);
+		Window::SoftPanels::ClipToListCard(p, card);
 	}
 	p.translate(0, rowsTopCached);
 	const auto handleRepaintAfter = [&](crl::time repaintAfter) {
@@ -2718,6 +2728,11 @@ void PeerListContent::visibleTopBottomUpdated(
 	if ((_visibleTop != visibleTop || _visibleBottom != visibleBottom)
 		&& _mode != Mode::Custom) {
 		_rowsScrollCache.markScrolling();
+	}
+	if (_softCard
+		&& (_visibleTop != visibleTop || _visibleBottom != visibleBottom)) {
+		// WHY: the card's rounded ends follow the visible area.
+		update();
 	}
 	_visibleTop = visibleTop;
 	_visibleBottom = visibleBottom;

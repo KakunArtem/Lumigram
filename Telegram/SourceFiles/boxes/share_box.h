@@ -96,11 +96,15 @@ void FastShareLink(
 	QImage image,
 	const QString &caption);
 
-// Round accent send button used by the Soft Panels share and forward boxes.
+// Send icon button inside the comment pill of the Soft Panels share and
+// forward boxes. With stars, it grows to show the price for paid chats
+// and widens the field's right margin to match.
 [[nodiscard]] not_null<Ui::AbstractButton*> CreateSoftSendButton(
 	not_null<QWidget*> parent,
 	Fn<void()> send,
-	Fn<void(not_null<Ui::RpWidget*>)> showMenu);
+	Fn<void(not_null<Ui::RpWidget*>)> showMenu,
+	rpl::producer<int> stars = nullptr,
+	Ui::InputField *field = nullptr);
 
 struct RecipientMoneyRestrictionError;
 [[nodiscard]] auto ShareMessageMoneyRestrictionError()

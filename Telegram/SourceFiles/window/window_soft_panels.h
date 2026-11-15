@@ -36,6 +36,18 @@ struct CardsArgs {
 
 void PaintListCard(QPainter &p, const QRectF &rect, float64 radius = -1.);
 
+// The part of a list card that is on screen in a scrolled list. The card
+// keeps its top and bottom gaps inside the visible area, so its rounded
+// ends stay in view instead of being cut by the scroll viewport.
+[[nodiscard]] QRect VisibleListCard(
+	QRect card,
+	int contentHeight,
+	int visibleTop,
+	int visibleBottom);
+
+// Clips rows to the rounded shape PaintListCard fills.
+void ClipToListCard(QPainter &p, const QRectF &rect);
+
 // Draws rounded cards behind runs of rows in content, under its widgets.
 void SetupCards(
 	not_null<QWidget*> host,

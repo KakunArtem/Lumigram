@@ -11,6 +11,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "base/call_delayed.h"
 #include "base/random.h"
 #include "lang/lang_keys.h"
+#include "lang/lang_tag.h"
 #include "base/qthelp_url.h"
 #include "storage/localimageloader.h"
 #include "storage/storage_account.h"
@@ -88,17 +89,74 @@ namespace {
 not_null<Ui::AbstractButton*> CreateSoftSendButton(
 		not_null<QWidget*> parent,
 		Fn<void()> send,
-		Fn<void(not_null<Ui::RpWidget*>)> showMenu) {
+		Fn<void(not_null<Ui::RpWidget*>)> showMenu,
+		rpl::producer<int> stars,
+		Ui::InputField *field) {
 	const auto result = Ui::CreateChild<Ui::AbstractButton>(parent.get());
-	result->resize(st::shareSoftSendSize, st::shareSoftSendSize);
+	const auto size = st::shareSoftSendSize;
+	result->resize(size, size);
+	result->setCursor(style::cur_pointer);
+
+	// WHY: the original send button reads "Send for N stars" in paid
+	// chats; the icon button shows the same price left of the icon.
+	const auto price = result->lifetime().make_state<QString>();
+	if (stars) {
+		std::move(
+			stars
+		) | rpl::on_next([=](int count) {
+			*price = (count > 0)
+				? Lang::FormatCountToShort(count).string
+				: QString();
+			const auto extra = price->isEmpty()
+				? 0
+				: (st::shareSoftSendPriceLeft
+					+ st::shareSoftSendStar.width()
+					+ st::shareSoftSendPriceSkip
+					+ st::semiboldFont->width(*price));
+			const auto width = size + extra;
+			if (result->width() != width) {
+				// Keep the right edge where the callers placed it.
+				const auto right = result->x() + result->width();
+				result->setGeometry(right - width, result->y(), width, size);
+			}
+			if (field) {
+				field->setAdditionalMargins({ 0, 0, extra, 0 });
+			}
+			result->update();
+		}, result->lifetime());
+	}
+
 	result->paintRequest(
 	) | rpl::on_next([=] {
+		// WHY: like the Soft Panels composer, the send icon sits inside
+		// the comment pill with no filled circle of its own.
 		auto p = QPainter(result);
-		auto hq = PainterHighQualityEnabler(p);
-		p.setPen(Qt::NoPen);
-		p.setBrush(st::activeButtonBg);
-		p.drawEllipse(result->rect());
-		st::shareSoftSendIcon.paintInCenter(p, result->rect());
+		const auto &icon = result->isOver()
+			? st::shareSoftSendIconOver
+			: st::shareSoftSendIcon;
+		const auto iconRect = QRect(result->width() - size, 0, size, size);
+		icon.paintInCenter(p, iconRect);
+		if (!price->isEmpty()) {
+			const auto &star = st::shareSoftSendStar;
+			auto x = st::shareSoftSendPriceLeft;
+			star.paint(p, x, (size - star.height()) / 2, result->width());
+			x += star.width() + st::shareSoftSendPriceSkip;
+			p.setFont(st::semiboldFont);
+			p.setPen(result->isOver()
+				? st::historySendIconFgOver
+				: st::historySendIconFg);
+			p.drawText(
+				x,
+				(size - st::semiboldFont->height) / 2
+					+ st::semiboldFont->ascent,
+				*price);
+		}
+	}, result->lifetime());
+	result->events(
+	) | rpl::filter([](not_null<QEvent*> e) {
+		return (e->type() == QEvent::Enter) || (e->type() == QEvent::Leave);
+	}) | rpl::on_next([=] {
+		result->update();
 	}, result->lifetime());
 	result->setAcceptBoth();
 	result->clicks(
@@ -228,6 +286,7 @@ private:
 	int _active = -1;
 	int _upon = -1;
 	int _visibleTop = 0;
+	int _visibleBottom = 0;
 
 	std::unique_ptr<Dialogs::IndexedList> _defaultChatsIndexed;
 	std::unique_ptr<Dialogs::IndexedList> _customChatsIndexed;
@@ -683,6 +742,7 @@ void ShareBox::showMenu(not_null<Ui::RpWidget*> parent) {
 
 void ShareBox::setupSoft() {
 	setStyle(st::shareBoxSoft);
+	setProperty(Ui::kNoScrollShadowsProperty, true);
 
 	const auto searchBg = Ui::CreateChild<Ui::RpWidget>(this);
 	searchBg->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -709,7 +769,9 @@ void ShareBox::setupSoft() {
 	const auto send = CreateSoftSendButton(
 		this,
 		[=] { submit({}); },
-		[=](not_null<Ui::RpWidget*> button) { showMenu(button); });
+		[=](not_null<Ui::RpWidget*> button) { showMenu(button); },
+		_starsToSend.value(),
+		_comment->entity());
 	_softSend = send;
 	_comment->geometryValue(
 	) | rpl::on_next([=](QRect geometry) {
@@ -1135,7 +1197,14 @@ void ShareBox::Inner::refreshRestrictedRows() {
 void ShareBox::Inner::visibleTopBottomUpdated(
 		int visibleTop,
 		int visibleBottom) {
+	const auto moved = (_visibleTop != visibleTop)
+		|| (_visibleBottom != visibleBottom);
 	_visibleTop = visibleTop;
+	_visibleBottom = visibleBottom;
+	if (_soft && moved) {
+		// WHY: the card's rounded ends follow the visible area.
+		update();
+	}
 	loadProfilePhotos();
 }
 
@@ -1457,11 +1526,17 @@ void ShareBox::Inner::paintEvent(QPaintEvent *e) {
 	p.setClipRect(r);
 	p.fillRect(r, _st.bg);
 	if (_soft) {
-		Window::SoftPanels::PaintListCard(p, QRectF(
-			st::shareSoftInset,
-			st::shareSoftCardTop,
-			width() - st::shareSoftInset - st::shareSoftInsetRight,
-			height() - st::shareSoftCardTop - st::shareSoftCardBottom));
+		const auto card = QRectF(Window::SoftPanels::VisibleListCard(
+			QRect(
+				st::shareSoftInset,
+				st::shareSoftCardTop,
+				width() - st::shareSoftInset - st::shareSoftInsetRight,
+				height() - st::shareSoftCardTop - st::shareSoftCardBottom),
+			height(),
+			_visibleTop,
+			_visibleBottom));
+		Window::SoftPanels::PaintListCard(p, card);
+		Window::SoftPanels::ClipToListCard(p, card);
 	}
 	auto yFrom = r.y(), yTo = r.y() + r.height();
 	auto rowFrom = yFrom / _rowHeight;

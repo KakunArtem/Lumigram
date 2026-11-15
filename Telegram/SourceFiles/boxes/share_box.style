@@ -57,12 +57,19 @@ shareSoftComment: InputField(shareComment) {
 	textBg: windowBgOver;
 	textBgActive: windowBgOver;
 	borderRadius: 18px;
-	textMargins: margins(14px, 8px, 14px, 6px);
+	// The right side leaves room for the send button inside the pill.
+	textMargins: margins(14px, 8px, 40px, 6px);
 }
-shareSoftCommentPadding: margins(12px, 6px, 65px, 6px);
+// The right side matches shareSoftInsetRight, so the field lines up
+// with the list card above it.
+shareSoftCommentPadding: margins(12px, 6px, 21px, 8px);
 shareSoftSendSize: 36px;
-shareSoftSendIcon: icon {{ "chat/input_send", activeButtonFg }};
-shareSoftFooterHeight: 40px;
+shareSoftSendIcon: icon {{ "chat/input_send", historySendIconFg }};
+shareSoftSendIconOver: icon {{ "chat/input_send", historySendIconFgOver }};
+// The star price shown left of the send icon for paid chats.
+shareSoftSendStar: icon {{ "chat/mini_stars", creditsBg1 }};
+shareSoftSendPriceLeft: 8px;
+shareSoftSendPriceSkip: 2px;shareSoftFooterHeight: 40px;
 shareSoftCopyIcon: icon {{ "menu/link", windowActiveTextFg }};
 shareSoftCopyLeft: 18px;
 shareSoftCopyTextLeft: 46px;

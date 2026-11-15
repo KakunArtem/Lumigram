@@ -247,6 +247,30 @@ void PaintListCard(QPainter &p, const QRectF &rect, float64 radius) {
 	Ui::Material::PaintListCard(p, rect, radius);
 }
 
+QRect VisibleListCard(
+		QRect card,
+		int contentHeight,
+		int visibleTop,
+		int visibleBottom) {
+	if (visibleBottom <= visibleTop) {
+		return card;
+	}
+	const auto topGap = card.y();
+	const auto bottomGap = contentHeight - (card.y() + card.height());
+	const auto top = std::max(card.y(), visibleTop + topGap);
+	const auto bottom = std::min(
+		card.y() + card.height(),
+		visibleBottom - bottomGap);
+	return QRect(card.x(), top, card.width(), std::max(bottom - top, 0));
+}
+
+void ClipToListCard(QPainter &p, const QRectF &rect) {
+	const auto radius = float64(Ui::PopupPanelRadius());
+	auto shape = QPainterPath();
+	shape.addRoundedRect(rect, radius, radius);
+	p.setClipPath(shape, Qt::IntersectClip);
+}
+
 PanelFrame::PanelFrame(not_null<QWidget*> parent, Corners corners)
 : RpWidget(parent)
 , _corners(corners) {
