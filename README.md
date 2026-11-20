@@ -26,24 +26,82 @@
 > or endorsed by Telegram. It talks to the same Telegram servers, so your chats
 > and contacts work exactly as they do in any other Telegram app.
 
-## What's different
+## How it looks
 
-Everything you know from Telegram Desktop is here. On top of that, Lumigram
-gives it a Windows 11 look:
+<table>
+  <tr>
+    <th>Light</th>
+    <th>Dark</th>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/lumigram-light.png" alt="Lumigram in the light theme"></td>
+    <td><img src="docs/assets/lumigram-dark.png" alt="Lumigram in the dark theme"></td>
+  </tr>
+</table>
 
-- **See-through windows.** The main window and its menus use Windows 11's
-  frosted glass (Acrylic), so your wallpaper softly shows through.
-- **Soft Panels layout.** Settings, the main menu and the share and forward
-  windows are grouped into rounded cards instead of long flat lists.
-- **Rounded notifications.** New message pop-ups are rounded cards that match
-  the rest of the app.
-- **Calmer details.** Pill-shaped tabs, a cleaner message bar and scroll bars
-  that stay thin until you point at them.
-- **Your choice.** Each of these can be turned off in
-  **Settings → Advanced** (see [Change the look](#change-the-look)).
+<sub>Screenshots taken on Windows 11. The chats, names and messages shown are
+made up.
+The frosted background takes its colors from whatever is behind the window,
+so yours will look a little different.</sub>
 
-Lumigram follows each new Telegram Desktop release, so new Telegram features
+## Features
+
+Everything you know from Telegram Desktop is here: chats, groups, channels,
+calls, stickers, folders and all your cloud history. On top of that, Lumigram
+gives it a Windows 11 look.
+
+### Frosted glass windows
+
+The main window uses Windows 11's frosted glass, called Acrylic. Your
+wallpaper and the windows behind Lumigram show through softly, blurred and
+tinted, so the app blends into your desktop instead of sitting on it like a
+solid block. The chat area gets a lighter frosted layer too, so messages stay
+easy to read.
+
+### Frosted menus
+
+Right-click menus and other pop-up menus get the same frosted glass and
+appear instantly, much like the Windows 11 menus in File Explorer.
+
+### Soft Panels layout
+
+Settings, the main menu, and the share and forward windows are grouped into
+rounded cards with space between them, instead of long flat lists with lines.
+Related options sit together on one card, so screens are easier to scan.
+
+### Rounded chat list and header
+
+Folder tabs above the chat list are pills, the chat header sits on its own
+soft bar, and the message bar at the bottom is a rounded field. Unread
+counters for muted chats are toned down so the chats you care about stand
+out.
+
+### Share and forward without the clutter
+
+Sharing or forwarding a message opens a cleaner window: a rounded list of
+chats, a search field that blends in, and a comment field with the send
+button built into it. In paid chats the button also shows the price in Stars.
+
+### Rounded notifications
+
+New message pop-ups in the corner of the screen are rounded cards that match
+the rest of the app. You can pick which corner they appear in, and Lumigram
+shows you a preview.
+
+### Quieter scroll bars
+
+Scroll bars stay thin and out of the way, then grow when you point at them so
+they're easy to grab.
+
+### Always current
+
+Lumigram follows every Telegram Desktop release. New Telegram features
 arrive here too, usually within a week.
+
+### Your choice
+
+The frosted glass and the Soft Panels layout can each be turned off in
+**Settings → Advanced** (see [Change the look](#change-the-look)).
 
 ## Install it
 
