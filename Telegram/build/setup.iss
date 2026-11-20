@@ -1,7 +1,7 @@
 #define MyAppShortName "Lumigram"
 #define MyAppName "Lumigram"
 #define MyAppPublisher "Lumigram contributors"
-#define MyAppURL "https://github.com/KakunArtem/tdesktopWin11"
+#define MyAppURL "https://github.com/KakunArtem/Lumigram"
 #define MyAppExeName "Lumigram.exe"
 #define MyAppId "D577977F-7663-42F3-B493-B90838D31061"
 #define CurrentYear GetDateTimeString('yyyy','','')

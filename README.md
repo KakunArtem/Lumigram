@@ -10,14 +10,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/KakunArtem/tdesktopWin11/releases"><b>Download</b></a> ·
+  <a href="https://github.com/KakunArtem/Lumigram/releases"><b>Download</b></a> ·
   <a href="#install-it">Install</a> ·
   <a href="#questions">Questions</a> ·
-  <a href="https://github.com/KakunArtem/tdesktopWin11/issues">Report a problem</a>
+  <a href="https://github.com/KakunArtem/Lumigram/issues">Report a problem</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/KakunArtem/tdesktopWin11/actions/workflows/win.yml"><img src="https://github.com/KakunArtem/tdesktopWin11/actions/workflows/win.yml/badge.svg?branch=dev" alt="Windows build"></a>
+  <a href="https://github.com/KakunArtem/Lumigram/actions/workflows/win.yml"><img src="https://github.com/KakunArtem/Lumigram/actions/workflows/win.yml/badge.svg?branch=dev" alt="Windows build"></a>
 </p>
 
 > [!NOTE]
@@ -28,21 +28,32 @@
 
 ## How it looks
 
-<table>
-  <tr>
-    <th>Light</th>
-    <th>Dark</th>
-  </tr>
-  <tr>
-    <td><img src="docs/assets/lumigram-light.png" alt="Lumigram in the light theme"></td>
-    <td><img src="docs/assets/lumigram-dark.png" alt="Lumigram in the dark theme"></td>
-  </tr>
-</table>
+Lumigram works with every Telegram theme, light or dark, including the
+custom themes from Telegram's theme catalog. It can also follow Windows: set
+**Settings → Chat Settings → Auto-night mode** to **System**, and Lumigram
+switches between light and dark whenever Windows does.
+
+### Light
+
+![Lumigram in a light theme](docs/assets/lumigram-light.png)
+
+Bright and airy. The frosted glass lets your desktop show through as a soft
+blue-gray haze. The chat list and the open chat each sit on their own
+rounded panel, and your messages are pale blue bubbles with dark text.
+Shown here with a blue custom theme from Telegram's theme catalog.
+
+### Dark
+
+![Lumigram in a dark theme](docs/assets/lumigram-dark.png)
+
+Deep blue-gray glass that's easy on the eyes at night. Messages are blue
+bubbles with light text, while links, read ticks and unread counters keep
+their accent colors so they still stand out. Shown here with Telegram's
+built-in **Tinted** night theme.
 
 <sub>Screenshots taken on Windows 11. The chats, names and messages shown are
-made up.
-The frosted background takes its colors from whatever is behind the window,
-so yours will look a little different.</sub>
+made up. The frosted background takes its colors from whatever is behind the
+window, so yours will look a little different.</sub>
 
 ## Features
 
@@ -108,7 +119,7 @@ The frosted glass and the Soft Panels layout can each be turned off in
 You need **Windows 11, 64-bit**. Windows 10 may work, but the see-through
 effects need Windows 11, and Windows 10 isn't tested.
 
-1. Open the [Releases page](https://github.com/KakunArtem/tdesktopWin11/releases)
+1. Open the [Releases page](https://github.com/KakunArtem/Lumigram/releases)
    and download the newest `Lumigram-Setup-x64-….exe`.
 2. Run it. Windows may show **"Windows protected your PC"** because the
    installer isn't signed yet. Click **More info**, then **Run anyway**.
@@ -138,7 +149,7 @@ notifications** in **Settings → Notifications**.
 ## Update or remove it
 
 - **Updating:** Lumigram doesn't update itself yet. When a new version appears
-  on the [Releases page](https://github.com/KakunArtem/tdesktopWin11/releases),
+  on the [Releases page](https://github.com/KakunArtem/Lumigram/releases),
   download it and install it over the old one. You stay signed in and keep
   your settings.
 - **Removing:** go to **Windows Settings → Apps → Installed apps**, find
@@ -156,7 +167,7 @@ code is public in this repository, so anyone can check what it does.
 No. Sign in with the account you already have.
 
 **Something looks wrong or doesn't work.**
-Please [open an issue](https://github.com/KakunArtem/tdesktopWin11/issues) and
+Please [open an issue](https://github.com/KakunArtem/Lumigram/issues) and
 add a screenshot if you can. If the problem is with the look, try turning the
 switch from [Change the look](#change-the-look) off and on again, and say in
 the issue whether that changed anything.
