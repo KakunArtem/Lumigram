@@ -69,7 +69,9 @@ shareSoftSendIconOver: icon {{ "chat/input_send", historySendIconFgOver }};
 // The star price shown left of the send icon for paid chats.
 shareSoftSendStar: icon {{ "chat/mini_stars", creditsBg1 }};
 shareSoftSendPriceLeft: 8px;
-shareSoftSendPriceSkip: 2px;shareSoftFooterHeight: 40px;
+shareSoftSendPriceSkip: 2px;
+shareSoftFooterHeight: 40px;
 shareSoftCopyIcon: icon {{ "menu/link", windowActiveTextFg }};
 shareSoftCopyLeft: 18px;
 shareSoftCopyTextLeft: 46px;
+shareStoryRepostIconSize: 34px;

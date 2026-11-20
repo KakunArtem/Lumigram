@@ -213,6 +213,10 @@ WelcomeMessagesWidget::WelcomeMessagesWidget(
 }
 
 WelcomeMessagesWidget::~WelcomeMessagesWidget() {
+	if (const auto box = _sendFilesBox.data()) {
+		box->closeBox();
+	}
+	_composeControls->closeSendAsFileBox();
 	if (_notice) {
 		_notice->destroy();
 	}
@@ -446,6 +450,7 @@ bool WelcomeMessagesWidget::confirmSendingFiles(
 		.cancelled = _composeControls->restoreTextCallback(
 			insertTextOnCancel),
 	});
+	_sendFilesBox = box.data();
 	box->takeTextWithTagsRequests(
 	) | rpl::on_next([=](TextWithTags &&text) {
 		_composeControls->setText(std::move(text));
