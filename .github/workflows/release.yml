@@ -1,0 +1,370 @@
+name: Release.
+
+# Builds a Lumigram release on GitHub-hosted runners and drafts a GitHub release.
+# Signing goes through SignPath Foundation (see CODE_SIGNING_POLICY.md) and is
+# off until the project is approved; then run with "sign" checked.
+#
+# Secrets: TDESKTOP_API_ID, TDESKTOP_API_HASH (Lumigram's API credentials),
+#          SIGNPATH_API_TOKEN (only when signing).
+# Variables (only when signing): SIGNPATH_ORGANIZATION_ID, SIGNPATH_PROJECT_SLUG,
+#          SIGNPATH_SIGNING_POLICY_SLUG.
+
+on:
+  workflow_dispatch:
+    inputs:
+      label:
+        description: 'Release label, for example beta12. The tag is lumigram-v<version>-<label>.'
+        required: true
+        type: string
+      sign:
+        description: 'Sign Lumigram.exe and the installer through SignPath.'
+        required: true
+        type: boolean
+        default: false
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+
+  build:
+    name: Build
+    if: github.repository == 'KakunArtem/Lumigram'
+    runs-on: windows-latest
+    timeout-minutes: 340
+
+    env:
+      PREPARE_PATH: "Telegram/build/prepare/prepare.py"
+
+    defaults:
+      run:
+        shell: cmd
+
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+
+    steps:
+      - name: Check inputs and secrets.
+        shell: pwsh
+        env:
+          LABEL: ${{ inputs.label }}
+          API_ID: ${{ secrets.TDESKTOP_API_ID }}
+          API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
+        run: |
+          if ($env:LABEL -notmatch '^[A-Za-z0-9.]+$') { throw 'The label may only use letters, digits and dots.' }
+          if (-not $env:API_ID -or -not $env:API_HASH) { throw 'Add the TDESKTOP_API_ID and TDESKTOP_API_HASH repository secrets first.' }
+
+      - name: Clean up preinstalled software.
+        shell: pwsh
+        run: |
+          $before = (Get-PSDrive C).Free / 1GB
+          Get-Service docker -ErrorAction SilentlyContinue | Stop-Service -ErrorAction SilentlyContinue
+          wsl --shutdown 2> $null
+          Remove-Item "C:\Android\android-sdk", "C:\Program Files\dotnet", "C:\Miniconda", "C:\msys64", "$env:USERPROFILE\.cargo", "$env:USERPROFILE\.rustup", "$env:LOCALAPPDATA\Docker", "C:\ProgramData\DockerDesktop", "C:\Program Files\PostgreSQL", "C:\PostgreSQL", "C:\Program Files\MongoDB", "C:\Program Files\MySQL" -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item "C:\ghcup", "C:\cabal", "C:\Program Files\LLVM", "C:\vcpkg", "C:\tools\kotlinc", "C:\tools\php", "C:\tools\Apache24", "C:\tools\nginx-*", "C:\selenium", "C:\SeleniumWebDrivers", "C:\Program Files\R", "C:\Program Files (x86)\R", "C:\rtools*", "C:\Program Files\Google\Chrome*", "C:\Program Files (x86)\Google\Chrome*", "C:\Program Files\Mozilla Firefox*", "C:\ProgramData\Package Cache" -Recurse -Force -ErrorAction SilentlyContinue
+          # The _Instances registry is how vswhere finds Visual Studio.
+          Get-ChildItem "C:\ProgramData\Microsoft\VisualStudio\Packages" -Exclude _Instances -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item C:\hostedtoolcache\windows\Go*, C:\hostedtoolcache\windows\Ruby*, C:\hostedtoolcache\windows\PyPy*, C:\hostedtoolcache\windows\Java_*, C:\hostedtoolcache\windows\NuGet* -Recurse -Force -ErrorAction SilentlyContinue
+          Write-Host ('{0:N1} GB -> {1:N1} GB free' -f $before, ((Get-PSDrive C).Free / 1GB))
+          exit 0
+
+      - name: Prepare directories.
+        run: |
+          mkdir %userprofile%\TBuild\Libraries
+          mklink /d %GITHUB_WORKSPACE%\TBuild %userprofile%\TBuild
+          echo TBUILD=%GITHUB_WORKSPACE%\TBuild>>%GITHUB_ENV%
+          echo LibrariesPath=%GITHUB_WORKSPACE%\TBuild\Libraries\win64>>%GITHUB_ENV%
+
+      - name: Get repository name.
+        shell: bash
+        run: echo "REPO_NAME=${GITHUB_REPOSITORY##*/}" >> $GITHUB_ENV
+
+      - name: Clone.
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+          path: ${{ env.TBUILD }}\${{ env.REPO_NAME }}
+
+      - name: Read the version.
+        id: version
+        shell: pwsh
+        run: |
+          $header = Get-Content "$env:TBUILD\$env:REPO_NAME\Telegram\SourceFiles\core\version.h" -Raw
+          if ($header -notmatch 'AppVersionStr = "([0-9.]+)"') { throw 'AppVersionStr not found in version.h.' }
+          "version=$($Matches[1])" >> $env:GITHUB_OUTPUT
+
+      - name: First set up.
+        shell: bash
+        run: |
+          DOCPATH=$TBUILD/$REPO_NAME/docs/building-win.md
+          SDK="$(grep "SDK version" $DOCPATH | sed -r 's/.*\*\*(.*)\*\* SDK version.*/\1/')"
+          echo "SDK=$SDK" >> $GITHUB_ENV
+
+          echo "$(sha256sum $TBUILD/$REPO_NAME/$PREPARE_PATH | awk '{ print $1 }')" >> CACHE_KEY.txt
+          echo "$SDK" >> CACHE_KEY.txt
+          echo "CACHE_KEY=$(sha256sum CACHE_KEY.txt | awk '{ print $1 }')" >> $GITHUB_ENV
+
+          echo "Configurate git for cherry-picks."
+          git config --global user.email "you@example.com"
+          git config --global user.name "Sample"
+
+      - uses: Eden-CI/msvc-dev-cmd@master
+        name: Native Tools Command Prompt.
+        with:
+          arch: x64
+          sdk: ${{ env.SDK }}
+          toolset: '14.44'
+
+      - name: NuGet sources.
+        run: |
+          nuget sources Disable -Name "Microsoft Visual Studio Offline Packages"
+          nuget sources Add -Source https://api.nuget.org/v3/index.json & exit 0
+
+      # The same caches as win.yml, so a release reuses what the Windows build prepared.
+      - name: ThirdParty cache.
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.TBUILD }}\ThirdParty
+          key: ${{ runner.OS }}-${{ runner.arch }}-third-party-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-${{ runner.arch }}-third-party-
+
+      - name: Libraries cache.
+        uses: actions/cache@v6
+        with:
+          path: ${{ env.LibrariesPath }}
+          key: ${{ runner.OS }}-x64-libs-${{ env.CACHE_KEY }}
+          restore-keys: ${{ runner.OS }}-x64-libs-
+
+      - name: Libraries.
+        run: |
+          set CARGO_INCREMENTAL=0
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
+
+      - name: Free up some disk space.
+        shell: bash
+        run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' -o -path '*/src/wallet_engine/*' ')' -type f ')' -o -empty ')' -delete
+
+      # Like the local release build: Lumigram's own API credentials, and no
+      # automatic updates or crash reports, which would reach Telegram's servers.
+      - name: Lumigram build.
+        env:
+          API_ID: ${{ secrets.TDESKTOP_API_ID }}
+          API_HASH: ${{ secrets.TDESKTOP_API_HASH }}
+        run: |
+          cd %TBUILD%\%REPO_NAME%\Telegram
+
+          call configure.bat x64 ^
+          -D TDESKTOP_API_ID=%API_ID% ^
+          -D TDESKTOP_API_HASH=%API_HASH% ^
+          -D CMAKE_CONFIGURATION_TYPES=Release ^
+          -D CMAKE_MSVC_DEBUG_INFORMATION_FORMAT= ^
+          -D DESKTOP_APP_DISABLE_AUTOUPDATE=ON ^
+          -D DESKTOP_APP_DISABLE_CRASH_REPORTS=ON
+          if errorlevel 1 exit /b %errorlevel%
+
+          cmake --build ..\out --config Release --target Telegram --parallel
+
+      - name: Collect the app files.
+        shell: pwsh
+        run: |
+          $out = "$env:TBUILD\$env:REPO_NAME\out\Release"
+          New-Item -ItemType Directory -Force app\modules\x64\d3d | Out-Null
+          Copy-Item "$out\Lumigram.exe" app\
+          if (Test-Path "$out\Updater.exe") { Copy-Item "$out\Updater.exe" app\ }
+          Copy-Item "$out\modules\x64\d3d\d3dcompiler_47.dll" app\modules\x64\d3d\
+          Get-ChildItem app -Recurse -File | ForEach-Object { '{0}  {1}' -f (Get-FileHash $_.FullName).Hash, $_.FullName }
+
+      - name: Upload the unsigned app.
+        id: upload-app
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-unsigned
+          path: app\
+          retention-days: 7
+
+  sign-app:
+    name: Sign the app
+    needs: build
+    if: inputs.sign
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Get the unsigned app.
+        uses: actions/download-artifact@v8
+        with:
+          name: app-unsigned
+          path: app
+
+      - name: Pick the file to sign.
+        run: mkdir to-sign && cp app/Lumigram.exe to-sign/
+
+      - name: Upload the file to sign.
+        id: upload-exe
+        uses: actions/upload-artifact@v7
+        with:
+          name: exe-to-sign
+          path: to-sign/
+          retention-days: 7
+
+      - name: Submit the signing request.
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload-exe.outputs.artifact-id }}
+          wait-for-completion: true
+          # Every release is approved by hand in SignPath.
+          wait-for-completion-timeout-in-seconds: 14400
+          output-artifact-directory: signed
+
+      - name: Upload the signed app.
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-signed
+          path: signed/Lumigram.exe
+          retention-days: 7
+
+  package:
+    name: Installer
+    needs: [build, sign-app]
+    if: always() && needs.build.result == 'success' && (needs.sign-app.result == 'success' || needs.sign-app.result == 'skipped')
+    runs-on: windows-latest
+    outputs:
+      name: ${{ steps.installer.outputs.name }}
+    steps:
+      - name: Clone.
+        uses: actions/checkout@v7
+
+      - name: Get the app files.
+        uses: actions/download-artifact@v8
+        with:
+          name: app-unsigned
+          path: out/Release
+
+      - name: Use the signed Lumigram.exe.
+        if: inputs.sign
+        uses: actions/download-artifact@v8
+        with:
+          name: app-signed
+          path: out/Release
+
+      - name: Install Inno Setup.
+        run: choco install innosetup -y --no-progress
+
+      - name: Build the installer.
+        id: installer
+        shell: pwsh
+        env:
+          LABEL: ${{ inputs.label }}
+        run: |
+          $path = & .\Telegram\build\make_installer.ps1 -Config Release -Label $env:LABEL | Select-Object -Last 1
+          if (-not (Test-Path $path)) { throw "Installer not found: $path" }
+          New-Item -ItemType Directory -Force installer | Out-Null
+          Copy-Item $path installer\
+          "name=$(Split-Path $path -Leaf)" >> $env:GITHUB_OUTPUT
+
+      - name: Upload the installer.
+        id: upload-installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-unsigned
+          path: installer/
+          retention-days: 7
+
+  sign-installer:
+    name: Sign the installer
+    needs: package
+    if: always() && inputs.sign && needs.package.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    steps:
+      - name: Get the installer.
+        uses: actions/download-artifact@v8
+        with:
+          name: installer-unsigned
+          path: installer
+
+      - name: Upload the file to sign.
+        id: upload-setup
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-to-sign
+          path: installer/
+          retention-days: 7
+
+      - name: Submit the signing request.
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG }}
+          signing-policy-slug: ${{ vars.SIGNPATH_SIGNING_POLICY_SLUG }}
+          github-artifact-id: ${{ steps.upload-setup.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 14400
+          output-artifact-directory: signed
+
+      - name: Upload the signed installer.
+        uses: actions/upload-artifact@v7
+        with:
+          name: installer-signed
+          path: signed/
+          retention-days: 7
+
+  publish:
+    name: Draft the GitHub release
+    needs: [build, package, sign-installer]
+    if: always() && needs.package.result == 'success' && (needs.sign-installer.result == 'success' || needs.sign-installer.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Get the installer.
+        uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.sign && 'installer-signed' || 'installer-unsigned' }}
+          path: installer
+
+      - name: Draft the release.
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.build.outputs.version }}
+          LABEL: ${{ inputs.label }}
+          SIGNED: ${{ inputs.sign }}
+          NAME: ${{ needs.package.outputs.name }}
+        run: |
+          set -euo pipefail
+          tag="lumigram-v${VERSION}-${LABEL}"
+          hash="$(sha256sum "installer/${NAME}" | awk '{ print $1 }')"
+          {
+            echo "Lumigram ${VERSION} (${LABEL}), based on Telegram Desktop ${VERSION}. Windows 11, 64-bit."
+            echo
+            echo "Download \`${NAME}\` below and run it. See [Install it](https://github.com/${GITHUB_REPOSITORY}#install-it)."
+            echo
+            if [ "$SIGNED" = "true" ]; then
+              echo "Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). See the [code signing policy](https://github.com/${GITHUB_REPOSITORY}/blob/dev/CODE_SIGNING_POLICY.md)."
+            else
+              echo "This build is not signed yet, so Windows may show \"Windows protected your PC\". Choose **More info**, then **Run anyway**. See the [code signing policy](https://github.com/${GITHUB_REPOSITORY}/blob/dev/CODE_SIGNING_POLICY.md)."
+            fi
+            echo
+            echo "Built by the [Release workflow](https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) from ${GITHUB_SHA}."
+            echo
+            echo "SHA-256 of \`${NAME}\`: \`${hash}\`"
+          } > notes.md
+          gh release create "$tag" "installer/${NAME}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Lumigram ${VERSION} (${LABEL})" \
+            --notes-file notes.md \
+            --prerelease \
+            --draft

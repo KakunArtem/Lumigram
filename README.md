@@ -187,6 +187,16 @@ is included as the `Telegram/lib_ui` submodule.
 - **Staying current:** new Telegram Desktop releases are merged into `dev`
   through `sync/<version>` pull requests.
 
+## Code signing policy
+
+Releases are built from this repository on GitHub's own servers. Signing goes
+through SignPath Foundation: free code signing provided by
+[SignPath.io](https://about.signpath.io), certificate by
+[SignPath Foundation](https://signpath.org). The application is pending, so
+releases are unsigned for now. Who builds, reviews and approves releases, and
+what Lumigram sends over the network, is in the
+[code signing policy](CODE_SIGNING_POLICY.md).
+
 ## License and credits
 
 Lumigram is free software under the
