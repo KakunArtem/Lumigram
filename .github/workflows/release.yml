@@ -154,8 +154,13 @@ jobs:
           $keys = Get-ChildItem "$env:TBUILD\ThirdParty\cache_keys", "$env:LibrariesPath\cache_keys" -File -ErrorAction SilentlyContinue | Sort-Object FullName | ForEach-Object { $_.FullName + '=' + (Get-Content $_.FullName -Raw) }
           "keys=$((Get-FileHash -InputStream ([IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes(($keys -join "`n") + '.')))).Hash)" >> $env:GITHUB_OUTPUT
 
+      # dump_syms is a Release-only breakpad tool for uploading crash symbols,
+      # which a release without crash reports doesn't need. It also needs ATL,
+      # which the runner image doesn't have.
       - name: Libraries.
         id: libraries
+        env:
+          SKIP_DUMPSYMS: "1"
         run: |
           set CARGO_INCREMENTAL=0
           %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
