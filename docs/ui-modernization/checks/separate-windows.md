@@ -53,7 +53,7 @@ Plan: [separate windows](../plans/2026-10-31-separate-windows.md). Reference:
 | Row | Result |
 | --- | --- |
 | Solid parity | Not run: no screenshots with Soft Panels and material off. |
-| Material (restore shell only) | Not run on screen. |
+| Material (restore shell only) | Not seen. On 2026-11-21 a Saved Messages window was opened, the app was quit and started again. At startup upstream's "Restore windows?" prompt (Always, Restore, Never) keeps the window closed; after Restore the window was already back with its content in the first frame of a screen recording, 30 ms after the click. So the shell shows for less than that, or not at all, on this path. The restored chat window itself was frosted with the composer pill, as in the main window. |
 | Contrast (notification title, text and Hide all) | Not measured. |
 | States (notification rest, hover, reply, fade) | Seen by the user on 2026-11-08: rest, hover and the Reply field. Fade not checked. Not measured. |
 | Scale | Not run. |
