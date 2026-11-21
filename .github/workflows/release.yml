@@ -124,29 +124,68 @@ jobs:
           nuget sources Disable -Name "Microsoft Visual Studio Offline Packages"
           nuget sources Add -Source https://api.nuget.org/v3/index.json & exit 0
 
-      # The same caches as win.yml, so a release reuses what the Windows build prepared.
+      # win.yml prepares the libraries in Debug only (skip-release), so a
+      # release keeps its own caches with the Release builds as well. Each run
+      # saves under a new key, right after the libraries step and even when a
+      # later step fails or the job times out: prepare.py records every
+      # finished library, so the next run carries on where this one stopped.
       - name: ThirdParty cache.
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.TBUILD }}\ThirdParty
-          key: ${{ runner.OS }}-${{ runner.arch }}-third-party-${{ env.CACHE_KEY }}
-          restore-keys: ${{ runner.OS }}-${{ runner.arch }}-third-party-
+          key: ${{ runner.OS }}-x64-release-third-party-${{ env.CACHE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.OS }}-x64-release-third-party-${{ env.CACHE_KEY }}-
+            ${{ runner.OS }}-x64-release-third-party-
 
       - name: Libraries cache.
-        uses: actions/cache@v6
+        uses: actions/cache/restore@v6
         with:
           path: ${{ env.LibrariesPath }}
-          key: ${{ runner.OS }}-x64-libs-${{ env.CACHE_KEY }}
-          restore-keys: ${{ runner.OS }}-x64-libs-
+          key: ${{ runner.OS }}-x64-release-libs-${{ env.CACHE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.OS }}-x64-release-libs-${{ env.CACHE_KEY }}-
+            ${{ runner.OS }}-x64-release-libs-
+
+      - name: Note the restored libraries.
+        id: before
+        shell: pwsh
+        run: |
+          $keys = Get-ChildItem "$env:TBUILD\ThirdParty\cache_keys", "$env:LibrariesPath\cache_keys" -File -ErrorAction SilentlyContinue | Sort-Object FullName | ForEach-Object { $_.FullName + '=' + (Get-Content $_.FullName -Raw) }
+          "keys=$((Get-FileHash -InputStream ([IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes(($keys -join "`n") + '.')))).Hash)" >> $env:GITHUB_OUTPUT
 
       - name: Libraries.
+        id: libraries
         run: |
           set CARGO_INCREMENTAL=0
-          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat skip-release silent
+          %TBUILD%\%REPO_NAME%\Telegram\build\prepare\win.bat silent
 
       - name: Free up some disk space.
+        if: always() && steps.libraries.outcome != 'skipped'
         shell: bash
         run: find $LibrariesPath '(' '(' ! '(' -name '*.lib' -o -name '*.a' -o -name '*.exe' -o -name '*.h' -o -name '*.hpp' -o -name '*.inc' -o -name '*.cmake' -o -name '*.pc' -o -path '*/include/*' -o -path '*/objects-*' -o -path '*/cache_keys/*' -o -path '*/patches/*' -o -path '*/nv-codec-headers/*' -o -path '*/src/wallet_engine/*' ')' -type f ')' -o -empty ')' -delete
+
+      - name: Note the built libraries.
+        id: after
+        if: always() && steps.libraries.outcome != 'skipped'
+        shell: pwsh
+        run: |
+          $keys = Get-ChildItem "$env:TBUILD\ThirdParty\cache_keys", "$env:LibrariesPath\cache_keys" -File -ErrorAction SilentlyContinue | Sort-Object FullName | ForEach-Object { $_.FullName + '=' + (Get-Content $_.FullName -Raw) }
+          "keys=$((Get-FileHash -InputStream ([IO.MemoryStream]::new([Text.Encoding]::UTF8.GetBytes(($keys -join "`n") + '.')))).Hash)" >> $env:GITHUB_OUTPUT
+
+      - name: Save the ThirdParty cache.
+        if: always() && steps.after.outputs.keys != '' && steps.after.outputs.keys != steps.before.outputs.keys
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.TBUILD }}\ThirdParty
+          key: ${{ runner.OS }}-x64-release-third-party-${{ env.CACHE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save the Libraries cache.
+        if: always() && steps.after.outputs.keys != '' && steps.after.outputs.keys != steps.before.outputs.keys
+        uses: actions/cache/save@v6
+        with:
+          path: ${{ env.LibrariesPath }}
+          key: ${{ runner.OS }}-x64-release-libs-${{ env.CACHE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       # Like the local release build: Lumigram's own API credentials, and no
       # automatic updates or crash reports, which would reach Telegram's servers.
