@@ -57,6 +57,8 @@ jobs:
         run: |
           if ($env:LABEL -notmatch '^[A-Za-z0-9.]+$') { throw 'The label may only use letters, digits and dots.' }
           if (-not $env:API_ID -or -not $env:API_HASH) { throw 'Add the TDESKTOP_API_ID and TDESKTOP_API_HASH repository secrets first.' }
+          if ($env:API_ID -notmatch '^\d+$') { throw 'TDESKTOP_API_ID must be the numeric api_id from my.telegram.org.' }
+          if ($env:API_HASH -notmatch '^[0-9a-f]{32}$') { throw 'TDESKTOP_API_HASH must be the 32-character api_hash from my.telegram.org.' }
 
       - name: Clean up preinstalled software.
         shell: pwsh
