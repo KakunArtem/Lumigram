@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- icon.svg tuned for 32 px and below: a larger bubble, a thicker
+       ring and a tighter glow, so the ring stays visible at 16 px. -->
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1D2350"/>
+      <stop offset="1" stop-color="#0E1230"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#5FF0D6"/>
+      <stop offset=".55" stop-color="#6FA2FF"/>
+      <stop offset="1" stop-color="#C77DFF"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="22"/>
+    </filter>
+    <path id="bubble" d="M512 196C700 196 836 322 836 488C836 654 700 780 512 780C470 780 431 774 395 762L262 826C246 834 228 819 234 802L266 702C219 652 188 574 188 488C188 322 324 196 512 196Z"/>
+  </defs>
+  <rect x="40" y="40" width="944" height="944" rx="236" fill="url(#night)"/>
+  <g transform="translate(512 506) scale(.9) translate(-512 -506)">
+    <use href="#bubble" fill="none" stroke="url(#neon)" stroke-width="140" filter="url(#glow)" opacity=".5"/>
+    <use href="#bubble" fill="none" stroke="url(#neon)" stroke-width="124" stroke-linejoin="round"/>
+  </g>
+</svg>
