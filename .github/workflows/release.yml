@@ -194,6 +194,15 @@ jobs:
           path: ${{ env.LibrariesPath }}
           key: ${{ runner.OS }}-x64-release-libs-${{ env.CACHE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
 
+      # The runner has 16 GB of memory, and four compilers sharing the large
+      # Release PCH run out of it near the end of the app build.
+      - name: Enlarge the page file.
+        uses: al-cheb/configure-pagefile-action@9b6da52fb72a3c6147c1aad2df22d8d905681adc # v1.5
+        with:
+          minimum-size: 16GB
+          maximum-size: 40GB
+          disk-root: "D:"
+
       # Like the local release build: Lumigram's own API credentials, and no
       # automatic updates or crash reports, which would reach Telegram's servers.
       - name: Lumigram build.
