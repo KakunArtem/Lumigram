@@ -7,33 +7,37 @@
    xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
    xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
    IgnorableNamespaces="uap uap2 uap3 desktop rescap">
-  <Identity Name="TelegramMessengerLLP.TelegramDesktop"
+  <!-- Partner Center assigns Identity Name, Publisher and
+       PublisherDisplayName when the name Lumigram is reserved (Product
+       management > Product identity). Replace these placeholders with
+       those values before submitting a package to the Store. -->
+  <Identity Name="KakunArtem.Lumigram"
     ProcessorArchitecture="ARCHITECTURE"
-    Publisher="CN=536BC709-8EE1-4478-AF22-F0F0F26FF64A"
+    Publisher="CN=00000000-0000-0000-0000-000000000000"
     Version="7.4.5.0" />
   <Properties>
-    <DisplayName>Telegram Desktop</DisplayName>
-    <PublisherDisplayName>Telegram Messenger LLP</PublisherDisplayName>
-    <Description>Telegram Desktop official messenger</Description>
+    <DisplayName>Lumigram</DisplayName>
+    <PublisherDisplayName>KakunArtem</PublisherDisplayName>
+    <Description>Lumigram, an unofficial Telegram client for Windows 11</Description>
     <Logo>Assets\logo\logo.png</Logo>
   </Properties>
   <Resources>
     <Resource Language="en-us" />
   </Resources>
   <Dependencies>
-    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.14316.0" MaxVersionTested="10.0.14316.0" />
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.22000.0" MaxVersionTested="10.0.26100.0" />
   </Dependencies>
   <Capabilities>
     <rescap:Capability Name="runFullTrust"/>
   </Capabilities>
   <Applications>
-    <Application Id="Telegram.TelegramDesktop.Store" Executable="Telegram.exe" EntryPoint="Windows.FullTrustApplication">
+    <Application Id="Lumigram.Lumigram.Store" Executable="Lumigram.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-       BackgroundColor="#1e94d0"
-       DisplayName="Telegram Desktop"
+       BackgroundColor="transparent"
+       DisplayName="Lumigram"
        Square150x150Logo="Assets\logo150\logo150.png"
        Square44x44Logo="Assets\logo44\logo44.png"
-       Description="Telegram Desktop official messenger" />
+       Description="Lumigram, an unofficial Telegram client for Windows 11" />
       <Extensions>
         <uap3:Extension Category="windows.protocol">
           <uap3:Protocol Name="tg" Parameters="-- &quot;%1&quot;" />
@@ -49,9 +53,9 @@
           Executable="StartupTask.exe"
           EntryPoint="Windows.FullTrustApplication">
           <desktop:StartupTask
-            TaskId="TelegramStartupTask"
+            TaskId="LumigramStartupTask"
             Enabled="false"
-            DisplayName="Telegram Desktop" />
+            DisplayName="Lumigram" />
         </desktop:Extension>
       </Extensions>
     </Application>
