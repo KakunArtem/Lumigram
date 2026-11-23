@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
       UPSTREAM: https://github.com/telegramdesktop/tdesktop.git
       LABEL: upstream-sync
     steps:
