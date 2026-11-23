@@ -14,7 +14,7 @@
   <Identity Name="KakunArtem.Lumigram"
     ProcessorArchitecture="ARCHITECTURE"
     Publisher="CN=00000000-0000-0000-0000-000000000000"
-    Version="7.4.5.0" />
+    Version="7.4.6.0" />
   <Properties>
     <DisplayName>Lumigram</DisplayName>
     <PublisherDisplayName>KakunArtem</PublisherDisplayName>

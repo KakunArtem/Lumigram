@@ -237,7 +237,7 @@ not affiliated with it.
 * twidget ([BSD 3-Clause License](https://github.com/TelegramMessenger/twidget/blob/main/LICENSE))
 * litehtml ([BSD 3-Clause License](https://github.com/litehtml/litehtml/blob/master/LICENSE))
 * Gumbo ([Apache License 2.0](https://github.com/google/gumbo-parser/blob/master/COPYING))
-* QuickJS-ng ([MIT License](https://github.com/quickjs-ng/quickjs/blob/master/LICENSE))
+* Nova ([Mozilla Public License 2.0](https://github.com/trynova/nova/blob/main/LICENSE.md))
 * FrequencyWords by Hermit Dave ([Creative Commons Attribution-ShareAlike 4.0](https://creativecommons.org/licenses/by-sa/4.0/))
 
 </details>
