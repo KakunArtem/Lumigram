@@ -91,13 +91,19 @@ bool DarkTasbarValueValid/* = false*/;
 	auto hq = PainterHighQualityEnabler(p);
 	const auto xm = image.width() / 16.;
 	const auto ym = image.height() / 16.;
-	p.setBrush(color);
+	const auto circle = [&](double cx, double cy, double r) {
+		return QRectF((cx - r) * xm, (cy - r) * ym, 2 * r * xm, 2 * r * ym);
+	};
+	// The dot sits in the top right corner, which the L leaves empty. The
+	// clear ring around it keeps it from merging with the tile outline,
+	// like the gap in tray_monochrome_attention.svg.
 	p.setPen(Qt::NoPen);
-	p.drawEllipse(QRectF( // cx=3.9, cy=12.7, r=2.2
-		1.7 * xm,
-		10.5 * ym,
-		4.4 * xm,
-		4.4 * ym));
+	p.setBrush(Qt::black);
+	p.setCompositionMode(QPainter::CompositionMode_Clear);
+	p.drawEllipse(circle(12.1, 3.9, 3.125));
+	p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+	p.setBrush(color);
+	p.drawEllipse(circle(12.1, 3.9, 2.2));
 	return image;
 }
 

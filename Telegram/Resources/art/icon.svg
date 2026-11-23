@@ -1,32 +1,81 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <!-- Lumigram app icon: a speech bubble drawn as a glowing ring on a
-       night tile. icon_small.svg is the same icon tuned for 32 px and
-       below. Telegram/build/app_icons.ps1 renders both into the PNG and
-       ICO files next to them. -->
-  <defs>
-    <linearGradient id="night" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#1D2350"/>
-      <stop offset="1" stop-color="#0E1230"/>
-    </linearGradient>
-    <radialGradient id="sky" cx=".3" cy=".12" r=".8">
-      <stop offset="0" stop-color="#7C8CFF" stop-opacity=".22"/>
-      <stop offset="1" stop-color="#7C8CFF" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="neon" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5FF0D6"/>
-      <stop offset=".55" stop-color="#6FA2FF"/>
-      <stop offset="1" stop-color="#C77DFF"/>
-    </linearGradient>
-    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feGaussianBlur stdDeviation="34"/>
-    </filter>
-    <path id="bubble" d="M512 196C700 196 836 322 836 488C836 654 700 780 512 780C470 780 431 774 395 762L262 826C246 834 228 819 234 802L266 702C219 652 188 574 188 488C188 322 324 196 512 196Z"/>
-  </defs>
-  <rect x="72" y="72" width="880" height="880" rx="236" fill="url(#night)"/>
-  <rect x="72" y="72" width="880" height="880" rx="236" fill="url(#sky)"/>
-  <rect x="76" y="76" width="872" height="872" rx="232" fill="none" stroke="#fff" stroke-opacity=".1" stroke-width="8"/>
-  <g transform="translate(512 500) scale(.82) translate(-512 -500)">
-    <use href="#bubble" fill="none" stroke="url(#neon)" stroke-width="110" filter="url(#glow)" opacity=".75"/>
-    <use href="#bubble" fill="none" stroke="url(#neon)" stroke-width="78" stroke-linejoin="round"/>
-  </g>
+  <!-- Lumigram app icon: a frosted L, lit from inside, on a graphite
+       squircle. The L's cyan and violet light spills onto the tile.
+       icon_small.svg is the same icon tuned for 32 px and below.
+       Telegram/build/app_icons.ps1 renders both into the PNG and ICO
+       files next to them. -->
+<defs>
+<linearGradient id="i1" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#24262D"/>
+<stop offset="1" stop-color="#15171C"/>
+</linearGradient>
+<radialGradient id="i2" gradientUnits="userSpaceOnUse" cx="330" cy="320" r="430">
+<stop offset="0" stop-color="#3EE6D6" stop-opacity="0.24"/>
+<stop offset="1" stop-color="#3EE6D6" stop-opacity="0"/>
+</radialGradient>
+<radialGradient id="i3" gradientUnits="userSpaceOnUse" cx="760" cy="790" r="400">
+<stop offset="0" stop-color="#A96AF0" stop-opacity="0.24"/>
+<stop offset="1" stop-color="#A96AF0" stop-opacity="0"/>
+</radialGradient>
+<clipPath id="i4">
+<path d="M952.0 512.0L951.8 559.0L951.3 586.6L950.4 609.6L949.1 630.2L947.5 649.0L945.6 666.4L943.2 682.8L940.6 698.4L937.5 713.1L934.1 727.2L930.4 740.6L926.3 753.5L921.8 765.9L917.0 777.8L911.8 789.2L906.2 800.1L900.3 810.6L894.0 820.7L887.4 830.4L880.4 839.7L873.0 848.6L865.2 857.1L857.1 865.2L848.6 873.0L839.7 880.4L830.4 887.4L820.7 894.0L810.6 900.3L800.1 906.2L789.2 911.8L777.8 917.0L765.9 921.8L753.5 926.3L740.6 930.4L727.2 934.1L713.1 937.5L698.4 940.6L682.8 943.2L666.4 945.6L649.0 947.5L630.2 949.1L609.6 950.4L586.6 951.3L559.0 951.8L512.0 952.0L465.0 951.8L437.4 951.3L414.4 950.4L393.8 949.1L375.0 947.5L357.6 945.6L341.2 943.2L325.6 940.6L310.9 937.5L296.8 934.1L283.4 930.4L270.5 926.3L258.1 921.8L246.2 917.0L234.8 911.8L223.9 906.2L213.4 900.3L203.3 894.0L193.6 887.4L184.3 880.4L175.4 873.0L166.9 865.2L158.8 857.1L151.0 848.6L143.6 839.7L136.6 830.4L130.0 820.7L123.7 810.6L117.8 800.1L112.2 789.2L107.0 777.8L102.2 765.9L97.7 753.5L93.6 740.6L89.9 727.2L86.5 713.1L83.4 698.4L80.8 682.8L78.4 666.4L76.5 649.0L74.9 630.2L73.6 609.6L72.7 586.6L72.2 559.0L72.0 512.0L72.2 465.0L72.7 437.4L73.6 414.4L74.9 393.8L76.5 375.0L78.4 357.6L80.8 341.2L83.4 325.6L86.5 310.9L89.9 296.8L93.6 283.4L97.7 270.5L102.2 258.1L107.0 246.2L112.2 234.8L117.8 223.9L123.7 213.4L130.0 203.3L136.6 193.6L143.6 184.3L151.0 175.4L158.8 166.9L166.9 158.8L175.4 151.0L184.3 143.6L193.6 136.6L203.3 130.0L213.4 123.7L223.9 117.8L234.8 112.2L246.2 107.0L258.1 102.2L270.5 97.7L283.4 93.6L296.8 89.9L310.9 86.5L325.6 83.4L341.2 80.8L357.6 78.4L375.0 76.5L393.8 74.9L414.4 73.6L437.4 72.7L465.0 72.2L512.0 72.0L559.0 72.2L586.6 72.7L609.6 73.6L630.2 74.9L649.0 76.5L666.4 78.4L682.8 80.8L698.4 83.4L713.1 86.5L727.2 89.9L740.6 93.6L753.5 97.7L765.9 102.2L777.8 107.0L789.2 112.2L800.1 117.8L810.6 123.7L820.7 130.0L830.4 136.6L839.7 143.6L848.6 151.0L857.1 158.8L865.2 166.9L873.0 175.4L880.4 184.3L887.4 193.6L894.0 203.3L900.3 213.4L906.2 223.9L911.8 234.8L917.0 246.2L921.8 258.1L926.3 270.5L930.4 283.4L934.1 296.8L937.5 310.9L940.6 325.6L943.2 341.2L945.6 357.6L947.5 375.0L949.1 393.8L950.4 414.4L951.3 437.4L951.8 465.0Z"/>
+</clipPath>
+<linearGradient id="i5" gradientUnits="userSpaceOnUse" x1="280" y1="254" x2="756" y2="762">
+<stop offset="0" stop-color="#3EE6D6"/>
+<stop offset="0.3" stop-color="#86D2EE"/>
+<stop offset="0.58" stop-color="#A9BDF2"/>
+<stop offset="0.82" stop-color="#AE96F2"/>
+<stop offset="1" stop-color="#A96AF0"/>
+</linearGradient>
+<radialGradient id="i6" gradientUnits="userSpaceOnUse" cx="430" cy="642" r="230">
+<stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/>
+<stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+</radialGradient>
+<mask id="i7" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="#fff"/>
+</mask>
+<filter id="i8" x="-40%" y="-40%" width="180%" height="180%">
+<feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#050B16" flood-opacity=".55"/>
+</filter>
+<filter id="i9" x="-60%" y="-60%" width="220%" height="220%">
+<feGaussianBlur stdDeviation="14"/>
+</filter>
+<filter id="i10" x="-60%" y="-60%" width="220%" height="220%">
+<feGaussianBlur stdDeviation="10"/>
+</filter>
+<filter id="i11" x="0" y="0" width="100%" height="100%">
+<feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="7" stitchTiles="stitch"/>
+<feColorMatrix type="saturate" values="0"/>
+<feComponentTransfer>
+<feFuncA type="table" tableValues="0 .5"/>
+</feComponentTransfer>
+</filter>
+<mask id="i12" maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="#fff"/>
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="#000" transform="translate(10 10)"/>
+</mask>
+</defs>
+<path d="M952.0 512.0L951.8 559.0L951.3 586.6L950.4 609.6L949.1 630.2L947.5 649.0L945.6 666.4L943.2 682.8L940.6 698.4L937.5 713.1L934.1 727.2L930.4 740.6L926.3 753.5L921.8 765.9L917.0 777.8L911.8 789.2L906.2 800.1L900.3 810.6L894.0 820.7L887.4 830.4L880.4 839.7L873.0 848.6L865.2 857.1L857.1 865.2L848.6 873.0L839.7 880.4L830.4 887.4L820.7 894.0L810.6 900.3L800.1 906.2L789.2 911.8L777.8 917.0L765.9 921.8L753.5 926.3L740.6 930.4L727.2 934.1L713.1 937.5L698.4 940.6L682.8 943.2L666.4 945.6L649.0 947.5L630.2 949.1L609.6 950.4L586.6 951.3L559.0 951.8L512.0 952.0L465.0 951.8L437.4 951.3L414.4 950.4L393.8 949.1L375.0 947.5L357.6 945.6L341.2 943.2L325.6 940.6L310.9 937.5L296.8 934.1L283.4 930.4L270.5 926.3L258.1 921.8L246.2 917.0L234.8 911.8L223.9 906.2L213.4 900.3L203.3 894.0L193.6 887.4L184.3 880.4L175.4 873.0L166.9 865.2L158.8 857.1L151.0 848.6L143.6 839.7L136.6 830.4L130.0 820.7L123.7 810.6L117.8 800.1L112.2 789.2L107.0 777.8L102.2 765.9L97.7 753.5L93.6 740.6L89.9 727.2L86.5 713.1L83.4 698.4L80.8 682.8L78.4 666.4L76.5 649.0L74.9 630.2L73.6 609.6L72.7 586.6L72.2 559.0L72.0 512.0L72.2 465.0L72.7 437.4L73.6 414.4L74.9 393.8L76.5 375.0L78.4 357.6L80.8 341.2L83.4 325.6L86.5 310.9L89.9 296.8L93.6 283.4L97.7 270.5L102.2 258.1L107.0 246.2L112.2 234.8L117.8 223.9L123.7 213.4L130.0 203.3L136.6 193.6L143.6 184.3L151.0 175.4L158.8 166.9L166.9 158.8L175.4 151.0L184.3 143.6L193.6 136.6L203.3 130.0L213.4 123.7L223.9 117.8L234.8 112.2L246.2 107.0L258.1 102.2L270.5 97.7L283.4 93.6L296.8 89.9L310.9 86.5L325.6 83.4L341.2 80.8L357.6 78.4L375.0 76.5L393.8 74.9L414.4 73.6L437.4 72.7L465.0 72.2L512.0 72.0L559.0 72.2L586.6 72.7L609.6 73.6L630.2 74.9L649.0 76.5L666.4 78.4L682.8 80.8L698.4 83.4L713.1 86.5L727.2 89.9L740.6 93.6L753.5 97.7L765.9 102.2L777.8 107.0L789.2 112.2L800.1 117.8L810.6 123.7L820.7 130.0L830.4 136.6L839.7 143.6L848.6 151.0L857.1 158.8L865.2 166.9L873.0 175.4L880.4 184.3L887.4 193.6L894.0 203.3L900.3 213.4L906.2 223.9L911.8 234.8L917.0 246.2L921.8 258.1L926.3 270.5L930.4 283.4L934.1 296.8L937.5 310.9L940.6 325.6L943.2 341.2L945.6 357.6L947.5 375.0L949.1 393.8L950.4 414.4L951.3 437.4L951.8 465.0Z" fill="url(#i1)"/>
+<g clip-path="url(#i4)">
+<rect width="1024" height="1024" fill="url(#i2)"/>
+<rect width="1024" height="1024" fill="url(#i3)"/>
+</g>
+<g transform="translate(-4 14)">
+<g opacity=".45" filter="url(#i9)">
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="url(#i5)"/>
+</g>
+<g filter="url(#i8)">
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="url(#i5)"/>
+</g>
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="url(#i6)"/>
+<g mask="url(#i7)">
+<g filter="url(#i10)" opacity=".55">
+<path d="M280 329A95 95 0 0 1 375 234A95 95 0 0 1 470 329V554A18 18 0 0 0 488 572H661A95 95 0 0 1 756 667A95 95 0 0 1 661 762H392A112 112 0 0 1 280 650Z" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+</g>
+</g>
+<g mask="url(#i7)" opacity=".16">
+<rect x="200" y="160" width="640" height="680" filter="url(#i11)"/>
+</g>
+<rect width="1024" height="1024" fill="#FFFFFF" fill-opacity=".45" mask="url(#i12)"/>
+</g>
 </svg>
