@@ -15,7 +15,7 @@ if ($versionHeader -notmatch 'AppVersionStr = "([0-9.]+)"') {
 }
 $version = $Matches[1]
 
-foreach ($file in 'Lumigram.exe', 'modules\x64\d3d\d3dcompiler_47.dll') {
+foreach ($file in 'Lumigram.exe', 'modules\x64\TelegramWidgetHelper.exe', 'modules\x64\d3d\d3dcompiler_47.dll') {
 	if (-not (Test-Path (Join-Path $buildPath $file))) {
 		throw "Missing $file in $buildPath. Build the $Config configuration first."
 	}

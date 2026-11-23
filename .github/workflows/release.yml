@@ -231,6 +231,7 @@ jobs:
           Copy-Item "$out\Lumigram.exe" app\
           if (Test-Path "$out\Updater.exe") { Copy-Item "$out\Updater.exe" app\ }
           Copy-Item "$out\modules\x64\d3d\d3dcompiler_47.dll" app\modules\x64\d3d\
+          Copy-Item "$out\modules\x64\TelegramWidgetHelper.exe" app\modules\x64\
           Get-ChildItem app -Recurse -File | ForEach-Object { '{0}  {1}' -f (Get-FileHash $_.FullName).Hash, $_.FullName }
 
       - name: Upload the unsigned app.
