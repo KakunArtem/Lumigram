@@ -22,6 +22,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/box_content_divider.h"
 #include "ui/widgets/separate_panel.h"
 #include "ui/widgets/soft_controls.h"
+#include "ui/wrap/padding_wrap.h"
+#include "ui/wrap/vertical_layout.h"
 
 #include <QtGui/QPaintEvent>
 #include <QtGui/QPainter>
@@ -77,8 +79,31 @@ base::options::toggle LayoutOption({
 		int bottom = 0;
 	};
 	auto cuts = std::vector<Cut>();
+	auto items = std::vector<Cut>();
 	const auto &padding = st::defaultSubsectionTitlePadding;
-	for (const auto child : content->findChildren<QWidget*>()) {
+	const auto children = content->findChildren<QWidget*>();
+	auto holdsLayout = base::flat_set<QWidget*>();
+	for (const auto child : children) {
+		if (dynamic_cast<Ui::VerticalLayout*>(child)) {
+			for (auto w = child; w && w != content.get(); w = w->parentWidget()) {
+				if (!holdsLayout.emplace(w).second) {
+					break;
+				}
+			}
+		}
+	}
+	for (const auto child : children) {
+		// WHY: rows are the items of vertical layouts; skips are empty
+		// fixed-height items, and containers are measured by their rows.
+		if (dynamic_cast<Ui::VerticalLayout*>(child->parentWidget())
+			&& !holdsLayout.contains(child)
+			&& !(dynamic_cast<Ui::FixedHeightWidget*>(child)
+				&& child->children().isEmpty())) {
+			const auto r = VisibleRect(child, content);
+			if (!r.isEmpty()) {
+				items.push_back({ r.y(), r.y() + r.height() });
+			}
+		}
 		if (dynamic_cast<Ui::BoxContentDivider*>(child)
 			|| child->property(kCardGapProperty).toBool()) {
 			const auto r = VisibleRect(child, content);
@@ -100,6 +125,20 @@ base::options::toggle LayoutOption({
 	auto result = std::vector<QRect>();
 	auto top = 0;
 	const auto add = [&](int bottom) {
+		// WHY: a section ends with a skip under its last row, which left
+		// more space below the rows than above them. Trim the card so the
+		// rows sit centred.
+		auto first = bottom;
+		auto last = top;
+		for (const auto &item : items) {
+			if (item.top >= top && item.bottom <= bottom) {
+				first = std::min(first, item.top);
+				last = std::max(last, item.bottom);
+			}
+		}
+		if (first < last) {
+			bottom = std::min(bottom, last + (first - top));
+		}
 		if (bottom - top >= st::settingsCardMinHeight) {
 			result.push_back(QRect(0, top, content->width(), bottom - top));
 		}
@@ -235,11 +274,15 @@ void SetupCards(
 			args.shrink,
 			args.inset,
 			args.shrink);
+		auto shapes = std::vector<QRectF>();
 		for (const auto &card : CollectCards(content)) {
-			PaintListCard(
-				p,
-				QRectF(card.translated(shift)).marginsRemoved(margins));
+			const auto shape = QRectF(card).marginsRemoved(margins);
+			shapes.push_back(shape);
+			PaintListCard(p, shape.translated(shift));
 		}
+		// WHY: rows paint their hover over the card, so they need its
+		// rounded corners to keep the hover inside.
+		Ui::SetCardShapes(content, shapes, Ui::PopupPanelRadius());
 	}, cards->lifetime());
 }
 

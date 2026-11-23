@@ -24,6 +24,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/widgets/fields/input_field.h"
 #include "ui/widgets/labels.h"
 #include "ui/widgets/scroll_area.h"
+#include "ui/widgets/soft_controls.h"
 #include "ui/wrap/vertical_layout.h"
 #include "ui/text/text_entity.h"
 #include "styles/style_edit_peer_members.h"
@@ -131,7 +132,14 @@ HighlightOverlay::HighlightOverlay(
 		const auto r = rect();
 		switch (_args.shape) {
 		case HighlightShape::Rect:
-			if (_args.radius > 0) {
+			// WHY: a row in a Soft Panels card shows its hover as a
+			// rounded pill, so the search highlight takes the same shape.
+			if (const auto shape = (_args.radius > 0)
+					? std::optional<QPainterPath>()
+					: Ui::CardRowShape(this)) {
+				PainterHighQualityEnabler hq(p);
+				p.drawPath(*shape);
+			} else if (_args.radius > 0) {
 				PainterHighQualityEnabler hq(p);
 				p.drawRoundedRect(r, _args.radius, _args.radius);
 			} else {
